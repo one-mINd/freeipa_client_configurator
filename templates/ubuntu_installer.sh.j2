@@ -1,0 +1,29 @@
+if ! grep -Fxq "{{server_ip}} {{server}}" /etc/hosts
+then
+  echo "{{server_ip}} {{server}}" >> /etc/hosts  
+fi
+
+if ! grep -Fxq "{{server_ip}}" /etc/systemd/resolved.conf
+then
+  sudo sed -i '15s/#DNS=/DNS=/g' /etc/systemd/resolved.conf
+  sudo sed -i '15s/DNS=/DNS={{server_ip}} /g' /etc/systemd/resolved.conf
+fi
+
+sudo rm /etc/resolv.conf
+sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
+sudo systemctl restart systemd-resolved
+
+echo "Enter your hostname > "
+read name
+
+hostname="$name.{{ domain }}"
+
+if ! grep -Fxq "${hostname}" /etc/hosts
+then
+  sudo sed -i 's/127.0.1.1/127.0.1.1 "$hostname"/g' /etc/hosts
+fi
+
+sudo apt update
+sudo apt install -y freeipa-client
+sudo ipa-client-install --unattended --mkhomedir --hostname=${hostname} --server={{ server }} --domain={{ domain }} --realm={{ realm }} --principal={{ principal }} --password={{ freeipa_client_password }}

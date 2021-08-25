@@ -1,0 +1,17 @@
+---
+- name: Create intaller directory
+  file:
+    path: "{{ ansible_env.HOME }}/ipaclient_installer"
+    state: directory
+
+- name: Installer generation for MacOSX
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ ansible_env.HOME }}/ipaclient_installer/{{ item }}"
+  with_items:
+    - macosx_installer.sh
+    - authorization
+    - krb5.conf
+    - ldapv3_config.plist
+    - passwd
+    - screensaver

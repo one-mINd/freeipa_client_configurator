@@ -1,0 +1,8 @@
+---
+- name: Installer generation for Ubuntu
+  ansible.builtin.template:
+    src: "ubuntu_installer.sh.j2"
+    dest: "{{ ansible_env.HOME }}/ubuntu_installer.sh"
+    owner: root
+    group: root
+    mode: '0755'

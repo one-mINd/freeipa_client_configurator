@@ -1,0 +1,39 @@
+#!/bin/bash
+
+echo "adding server ip to hosts"
+if ! grep -Fxq "{{server_ip}} {{server}}" /etc/hosts
+then
+  echo "{{server_ip}} {{server}}" >> /etc/hosts  
+fi
+
+echo "adding dns"
+networksetup -setdnsservers Wi-Fi {{ server_ip }} 1.1.1.1
+networksetup -setsearchdomains Wi-Fi {{ domain }}
+
+echo "adding certificate"
+curl -OLk http://{{ server }}/ipa/config/ca.crt
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ca.crt
+sudo mv ca.crt /etc/ipa
+
+echo "creating kerberos config"
+sudo cp krb5.conf /etc/krb5.conf
+
+echo "editing pam screensaver"
+sudo cp screensaver /etc/pam.d/screensaver
+
+echo "editing pam passwd"
+sudo cp passwd /etc/pam.d/passwd
+
+echo "Enter your hostname > "
+read name
+
+hostname="$name.{{ domain }}"
+
+echo "set hostname"
+sudo scutil --set HostName $hostname
+
+echo "directory utility and mappings setup"
+sudo defaults write /Library/Preferences/com.apple.loginwindow SHOWFULLNAME -bool false
+sudo dsconfigldap -a {{ server }}
+plutil -convert binary1 ldapv3_config.plist
+sudo mv ldapv3_config.plist ~/Library/Application\ Support/Directory\ Access/LDAPv3/Templates/{{ server }}_tmp.plist

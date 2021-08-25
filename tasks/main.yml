@@ -1,0 +1,8 @@
+---
+# tasks file for freeipa_client_installerh
+
+- include: ubuntu.yml
+  when: ansible_distribution == "Ubuntu"
+
+- include: macosx.yml
+  when: ansible_distribution == "MacOSX"

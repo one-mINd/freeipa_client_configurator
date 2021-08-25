@@ -1,0 +1,20 @@
+[domain_realm]
+    .{{ realm_lower_case }} = {{ realm }}
+    {{ realm_lower_case }} = {{ realm }}
+
+[libdefaults]
+    default_realm = {{ realm }}
+    allow_weak_crypto = yes  
+    dns_lookup_realm = true
+    dns_lookup_kdc = true
+    rdns = false
+    ticket_lifetime = 24h
+    forwardable = yes 
+    renewable = true
+ 
+[realms]
+    {{ realm }} = {
+        kdc = tcp/{{ server }}
+        admin_server = tcp/{{ server }}
+        pkinit_anchors = FILE:/etc/ipa/ca.crt
+    }
